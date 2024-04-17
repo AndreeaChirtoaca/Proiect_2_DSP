@@ -259,6 +259,8 @@ Other functions
 
 *******************************************/
 
+//obs. pt etapa 2 ?: Ar trebui sa mai adaug un rand pentru codul de oprire a comandei "#" si astfel sa am 5 randuri si 4 coloane, a.i. pe row = 4  & col = 0 cod = 0x10 //pt diez 
+// functie care citeste randul, coloana si returneaza codul tastei care a fost apasata 
 char read_keyboard(void)
 {
 // line 0 - PA0,  line 1 - PA1,  line 2 - PA2,  line 3 - PA3 - outputs 
@@ -266,19 +268,19 @@ char scan[4]={0xFE,0xFD,0xFB, 0xF7};
 char row,col;
 char cod=0xFF;
 
-for (row=0; row<4; row++)
+for (row=0; row<4; row++)    // randul se pune singur din acest for pe PORTA (xxxx rrrr), dar coloana o setam noi de la PINA(cccc xxxx)
 {
-PORTA=scan[row];
+PORTA=scan[row];  
 delay_us(1);
 // col 0 - PA4,  col 1 - PA5,  col 2 - PA6,  col 3 - PA7 - inputs 
-col=PINA>>4;
-if (col!=0x0F)
+col=PINA>>4; //dc. PINA = cccc xxxx, aceasta intructiune o sa imi shifteze bitii la dreapta si va rezulta =>col = 0000 cccc
+if (col!=0x0F)                 // daca ramane 0f -> inseamna ca nu am apasat inca nicio tasta, mergem pe logica negativa, daca apas => 0
     {
-    if (col==0x0E) col=0;
-    if (col==0x0D) col=1;
-    if (col==0x0B) col=2;
-    if (col==0x07) col=3;
-    cod=4*row+col;
+    if (col==0x0E) col=0;     // 0000 1110 -> coloana o   obs. : incep indexarea coloanelor si a randurilor de la 0 
+    if (col==0x0D) col=1;     // 0000 1101 -> coloana 1
+    if (col==0x0B) col=2;     // 0000 1011 -> coloana 2 
+    if (col==0x07) col=3;     // 0000 0111 -> coloana 3 
+    cod=4*row+col;            // din aceasta instructiune rezulta tasta care a fost apasata
     break;
     }
 }
